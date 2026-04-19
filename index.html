@@ -536,6 +536,61 @@
     margin-top: 1px;
   }
 
+  /* Finish section */
+  .finish-section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid var(--border);
+  }
+  .finish-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .finish-summary strong { color: var(--text); font-weight: 700; }
+  .btn-finish-session {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    background: var(--ok);
+    color: var(--bg);
+    border: none;
+    padding: 20px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-finish-session:hover { background: var(--accent); }
+  .btn-finish-session.completed {
+    background: var(--bg-elev);
+    color: var(--ok);
+    border: 1px solid var(--ok);
+  }
+  .btn-finish-session.completed:hover { background: var(--bg-card); }
+  .finish-icon {
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  /* Finish Timer (tiempo total en header) */
+  .session-duration {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+  .session-duration.active { color: var(--accent); }
+
   /* Rest Timer flotante */
   .rest-timer {
     position: fixed;
@@ -558,6 +613,8 @@
   }
   .rest-timer.visible { transform: translateX(-50%) translateY(0); }
   .rest-timer.finished { background: var(--warn); animation: pulse 0.6s ease-in-out 3; }
+  .rest-timer.paused { background: var(--text-dim); }
+  .rest-timer.paused .rest-time { opacity: 0.7; }
   @keyframes pulse {
     0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
     50% { transform: translateX(-50%) translateY(0) scale(1.05); }
@@ -743,6 +800,14 @@
     <div class="volume-title">Volumen semanal · series completadas / objetivo</div>
     <div class="volume-grid" id="volume-grid"></div>
   </section>
+
+  <section class="finish-section">
+    <div class="finish-summary" id="finish-summary"></div>
+    <button class="btn-finish-session" id="btn-finish-session">
+      <span class="finish-icon">✓</span>
+      <span id="finish-btn-label">Finalizar rutina del día</span>
+    </button>
+  </section>
 </main>
 
 <!-- Rest Timer flotante -->
@@ -755,6 +820,7 @@
   <div class="rest-actions">
     <button class="rest-btn" id="rest-minus">−15</button>
     <button class="rest-btn" id="rest-plus">+15</button>
+    <button class="rest-btn" id="rest-pause">❚❚</button>
     <button class="rest-btn close" id="rest-close">✕</button>
   </div>
 </div>
@@ -1546,6 +1612,47 @@ function updateSessionStats() {
     if (exData) done += (exData.sets || []).slice(0, series).filter(s => s && s.done).length;
   });
   document.getElementById("session-stats").textContent = `${done}/${total} series`;
+  updateFinishSection();
+}
+
+function updateFinishSection() {
+  const session = getSessionData(currentWeek, currentDay);
+  const day = RUTINA.dias.find(d => d.id === currentDay);
+  const week = RUTINA.semanas.find(w => w.n === currentWeek);
+
+  let total = 0, done = 0;
+  day.ejercicios.forEach(ex => {
+    const series = getSeriesForWeek(ex.series_base, week);
+    total += series;
+    const exData = session.exercises[ex.id];
+    if (exData) done += (exData.sets || []).slice(0, series).filter(s => s && s.done).length;
+  });
+
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const summaryEl = document.getElementById("finish-summary");
+  const btn = document.getElementById("btn-finish-session");
+  const label = document.getElementById("finish-btn-label");
+
+  // Calcular duración si la sesión está iniciada
+  let durationStr = "";
+  if (session.started_at) {
+    const endAt = session.finished_at ? new Date(session.finished_at) : new Date();
+    const startAt = new Date(session.started_at);
+    const mins = Math.round((endAt - startAt) / 60000);
+    durationStr = mins > 0 ? ` · ${mins} min` : "";
+  }
+
+  if (session.finished_at) {
+    const finishedDate = new Date(session.finished_at);
+    const hora = finishedDate.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+    summaryEl.innerHTML = `<strong>✓ Rutina completada</strong> a las ${hora}${durationStr} · ${done}/${total} series (${pct}%)`;
+    btn.classList.add("completed");
+    label.textContent = "Reabrir sesión";
+  } else {
+    summaryEl.innerHTML = `Progreso: <strong>${done}/${total} series</strong> (${pct}%)${durationStr}`;
+    btn.classList.remove("completed");
+    label.textContent = done === 0 ? "Finalizar rutina del día" : (done < total ? `Finalizar rutina (${total - done} series sin completar)` : "✓ Finalizar rutina del día");
+  }
 }
 
 function render() {
@@ -1556,6 +1663,7 @@ function render() {
   renderExercises();
   updateVolumePanel();
   updateSessionStats();
+  updateFinishSection();
 }
 
 /* ============================================
@@ -1563,6 +1671,8 @@ function render() {
    ============================================ */
 let restState = {
   running: false,
+  paused: false,
+  pausedRemaining: 0,
   secondsLeft: 0,
   intervalId: null,
   endsAt: 0,
@@ -1573,40 +1683,77 @@ let restState = {
 function startRestTimer(seconds, exerciseName, setNumber) {
   stopRestTimer(); // limpia timer anterior
   restState.running = true;
+  restState.paused = false;
   restState.secondsLeft = seconds;
   restState.endsAt = Date.now() + seconds * 1000;
   restState.exerciseName = exerciseName;
   restState.setNumber = setNumber;
 
   const timerEl = document.getElementById("rest-timer");
-  timerEl.classList.remove("finished");
+  timerEl.classList.remove("finished", "paused");
   timerEl.classList.add("visible");
   document.getElementById("rest-exercise").textContent = `${exerciseName} · Serie ${setNumber}`;
   document.getElementById("rest-label").textContent = "Descanso";
+  document.getElementById("rest-pause").textContent = "❚❚";
   updateRestDisplay();
-
-  restState.intervalId = setInterval(() => {
-    const remaining = Math.round((restState.endsAt - Date.now()) / 1000);
-    restState.secondsLeft = remaining;
-    updateRestDisplay();
-    if (remaining <= 0) {
-      onRestFinished();
-    }
-  }, 250);
+  startRestInterval();
 
   // Pequeña vibración al iniciar (feedback háctico)
   if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function startRestInterval() {
+  if (restState.intervalId) clearInterval(restState.intervalId);
+  restState.intervalId = setInterval(() => {
+    if (restState.paused) return;
+    const remaining = Math.round((restState.endsAt - Date.now()) / 1000);
+    restState.secondsLeft = remaining;
+    updateRestDisplay();
+    if (remaining <= 0 && restState.running) {
+      onRestFinished();
+      restState.running = false; // evitar que vuelva a disparar el beep
+    }
+  }, 250);
 }
 
 function stopRestTimer() {
   if (restState.intervalId) clearInterval(restState.intervalId);
   restState.intervalId = null;
   restState.running = false;
+  restState.paused = false;
 }
 
 function hideRestTimer() {
   stopRestTimer();
-  document.getElementById("rest-timer").classList.remove("visible", "finished");
+  document.getElementById("rest-timer").classList.remove("visible", "finished", "paused");
+}
+
+function togglePauseRestTimer() {
+  const timerEl = document.getElementById("rest-timer");
+  const pauseBtn = document.getElementById("rest-pause");
+
+  if (restState.paused) {
+    // Reanudar: recalcular endsAt desde el tiempo que quedaba al pausar
+    restState.endsAt = Date.now() + restState.pausedRemaining * 1000;
+    restState.paused = false;
+    restState.running = restState.pausedRemaining > 0;
+    timerEl.classList.remove("paused");
+    if (restState.pausedRemaining <= 0) {
+      // Estaba en negativo → seguir contando tiempo excedido
+      restState.endsAt = Date.now() - (-restState.pausedRemaining) * 1000;
+      document.getElementById("rest-label").textContent = "¡Listo! A la siguiente";
+    } else {
+      document.getElementById("rest-label").textContent = "Descanso";
+    }
+    pauseBtn.textContent = "❚❚";
+  } else {
+    // Pausar: guardar tiempo restante
+    restState.pausedRemaining = Math.round((restState.endsAt - Date.now()) / 1000);
+    restState.paused = true;
+    timerEl.classList.add("paused");
+    document.getElementById("rest-label").textContent = "Pausado";
+    pauseBtn.textContent = "▶";
+  }
 }
 
 function updateRestDisplay() {
@@ -1652,18 +1799,22 @@ function playBeep() {
 }
 
 document.getElementById("rest-close").onclick = hideRestTimer;
+document.getElementById("rest-pause").onclick = togglePauseRestTimer;
 document.getElementById("rest-plus").onclick = () => {
+  if (restState.paused) {
+    restState.pausedRemaining += 15;
+    // Actualizar display manualmente porque el interval está pausado
+    restState.secondsLeft = restState.pausedRemaining;
+    updateRestDisplay();
+    return;
+  }
   if (!restState.running && restState.secondsLeft <= 0) {
     // Si ya terminó, reiniciar con 15s
     restState.running = true;
     restState.endsAt = Date.now() + 15000;
     document.getElementById("rest-timer").classList.remove("finished");
     document.getElementById("rest-label").textContent = "Descanso";
-    restState.intervalId = setInterval(() => {
-      restState.secondsLeft = Math.round((restState.endsAt - Date.now()) / 1000);
-      updateRestDisplay();
-      if (restState.secondsLeft <= 0) onRestFinished();
-    }, 250);
+    startRestInterval();
   } else {
     restState.endsAt += 15000;
     restState.secondsLeft = Math.round((restState.endsAt - Date.now()) / 1000);
@@ -1671,18 +1822,30 @@ document.getElementById("rest-plus").onclick = () => {
   }
 };
 document.getElementById("rest-minus").onclick = () => {
+  if (restState.paused) {
+    restState.pausedRemaining -= 15;
+    restState.secondsLeft = restState.pausedRemaining;
+    updateRestDisplay();
+    return;
+  }
   restState.endsAt -= 15000;
   restState.secondsLeft = Math.round((restState.endsAt - Date.now()) / 1000);
   updateRestDisplay();
-  if (restState.secondsLeft <= 0 && restState.running) onRestFinished();
+  if (restState.secondsLeft <= 0 && restState.running) {
+    onRestFinished();
+    restState.running = false;
+  }
 };
 
 // Mantener el timer funcionando aunque la pestaña esté en background (recalcular al volver)
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && restState.intervalId) {
+  if (!document.hidden && restState.intervalId && !restState.paused) {
     restState.secondsLeft = Math.round((restState.endsAt - Date.now()) / 1000);
     updateRestDisplay();
-    if (restState.secondsLeft <= 0) onRestFinished();
+    if (restState.secondsLeft <= 0 && restState.running) {
+      onRestFinished();
+      restState.running = false;
+    }
   }
 });
 
@@ -1729,6 +1892,86 @@ document.getElementById("btn-reset").onclick = () => {
     render();
   }
 };
+
+/* ============================================
+   FINALIZAR RUTINA DEL DÍA
+   ============================================ */
+document.getElementById("btn-finish-session").onclick = () => {
+  const session = getSessionData(currentWeek, currentDay);
+  const day = RUTINA.dias.find(d => d.id === currentDay);
+  const week = RUTINA.semanas.find(w => w.n === currentWeek);
+
+  if (session.finished_at) {
+    // Reabrir sesión
+    if (confirm("¿Reabrir esta sesión? Podrás seguir registrando series.")) {
+      session.finished_at = null;
+      saveState();
+      scheduleSheetsSync();
+      render();
+    }
+    return;
+  }
+
+  // Calcular stats para el resumen
+  let total = 0, done = 0;
+  const porGrupo = {};
+  day.ejercicios.forEach(ex => {
+    const series = getSeriesForWeek(ex.series_base, week);
+    total += series;
+    const exData = session.exercises[ex.id];
+    if (exData) {
+      const d = (exData.sets || []).slice(0, series).filter(s => s && s.done).length;
+      done += d;
+      ex.grupos.forEach(g => {
+        if (!RUTINA.objetivos_volumen[g]) return;
+        porGrupo[g] = (porGrupo[g] || 0) + d;
+      });
+    }
+  });
+
+  const incompleto = done < total;
+  const msg = incompleto
+    ? `Te faltan ${total - done} series por completar.\n\n¿Finalizar la rutina igual?`
+    : `¡Completaste todas las series (${done}/${total})!\n\n¿Finalizar la rutina?`;
+
+  if (!confirm(msg)) return;
+
+  // Marcar finalizada
+  session.finished_at = new Date().toISOString();
+  if (!session.started_at) session.started_at = session.finished_at;
+
+  // Cerrar timer de descanso si estaba abierto
+  hideRestTimer();
+
+  saveState();
+  scheduleSheetsSync();
+
+  // Mostrar toast de resumen
+  showSessionSummary(session, day, done, total, porGrupo);
+  render();
+};
+
+function showSessionSummary(session, day, done, total, porGrupo) {
+  const duration = session.started_at
+    ? Math.round((new Date(session.finished_at) - new Date(session.started_at)) / 60000)
+    : 0;
+
+  const grupoList = Object.entries(porGrupo)
+    .map(([g, n]) => `${g}: ${n}`)
+    .join(" · ");
+
+  const msg = `
+✓ ${day.nombre} completado
+
+${done}/${total} series · ${duration} min
+
+${grupoList}
+
+Buen trabajo 💪
+  `.trim();
+
+  alert(msg);
+}
 
 /* ============================================
    GOOGLE SHEETS SYNC
@@ -1812,6 +2055,11 @@ function buildSheetRows() {
     const day = RUTINA.dias.find(d => d.id === sess.dayId);
     if (!day) return;
     const weekInfo = RUTINA.semanas.find(w => w.n === sess.week);
+    // Duración total de la sesión en minutos (si finalizó)
+    let duracionMin = "";
+    if (sess.started_at && sess.finished_at) {
+      duracionMin = Math.round((new Date(sess.finished_at) - new Date(sess.started_at)) / 60000);
+    }
     day.ejercicios.forEach(ex => {
       const exData = sess.exercises[ex.id];
       if (!exData || !exData.sets) return;
@@ -1819,6 +2067,9 @@ function buildSheetRows() {
         if (!set || (!set.peso && !set.reps && !set.done)) return;
         rows.push({
           fecha: sess.started_at || "",
+          fecha_fin: sess.finished_at || "",
+          duracion_min: duracionMin,
+          sesion_estado: sess.finished_at ? "FINALIZADA" : "EN_CURSO",
           semana: sess.week,
           fase: weekInfo ? weekInfo.fase : "",
           dia: sess.dayId,
@@ -1959,11 +2210,13 @@ render();
 const APPS_SCRIPT_CODE = `const SECRET_TOKEN = "cambia-este-token"; // debe coincidir con el token de la app
 const SHEET_NAME = "Rutina";
 const HEADERS = [
-  "fecha","semana","fase","dia","dia_nombre","ejercicio_id","ejercicio","grupo",
+  "fecha","fecha_fin","duracion_min","sesion_estado",
+  "semana","fase","dia","dia_nombre","ejercicio_id","ejercicio","grupo",
   "set_num","peso_kg","reps","rir","completado","tempo","descanso","rir_objetivo",
   "notas_ejercicio","sueno","energia","apetito","dolor_hombro","peso_corporal",
   "atleta","sync_timestamp"
 ];
+const ATLETA_COL_IDX = 25; // índice 0-based de "atleta" en HEADERS
 
 function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({
@@ -1987,9 +2240,11 @@ function doPost(e) {
     const sh = getOrCreateSheet();
 
     if (data.ping) {
-      sh.appendRow(["PING_" + new Date().toISOString(), "", "", "", "", "", "", "",
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                    data.atleta || "", data.timestamp || new Date().toISOString()]);
+      const pingRow = new Array(HEADERS.length).fill("");
+      pingRow[0] = "PING_" + new Date().toISOString();
+      pingRow[ATLETA_COL_IDX] = data.atleta || "";
+      pingRow[HEADERS.length - 1] = data.timestamp || new Date().toISOString();
+      sh.appendRow(pingRow);
       return jsonOut({ok: true, ping: true, rows: 1});
     }
 
@@ -1997,19 +2252,24 @@ function doPost(e) {
     const lastRow = sh.getLastRow();
     if (lastRow > 1) {
       const allData = sh.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
-      const keepRows = allData.filter(r => r[22] !== data.atleta && r[0] !== "" && String(r[0]).indexOf("PING") !== 0);
+      const keepRows = allData.filter(function(r) {
+        return r[ATLETA_COL_IDX] !== data.atleta && r[0] !== "" && String(r[0]).indexOf("PING") !== 0;
+      });
       sh.getRange(2, 1, lastRow - 1, HEADERS.length).clearContent();
       if (keepRows.length > 0) {
         sh.getRange(2, 1, keepRows.length, HEADERS.length).setValues(keepRows);
       }
     }
 
-    const output = rows.map(r => [
-      r.fecha, r.semana, r.fase, r.dia, r.dia_nombre, r.ejercicio_id, r.ejercicio, r.grupo,
-      r.set_num, r.peso_kg, r.reps, r.rir, r.completado, r.tempo, r.descanso, r.rir_objetivo,
-      r.notas_ejercicio, r.sueno, r.energia, r.apetito, r.dolor_hombro, r.peso_corporal,
-      data.atleta, data.timestamp
-    ]);
+    const output = rows.map(function(r) {
+      return [
+        r.fecha, r.fecha_fin || "", r.duracion_min || "", r.sesion_estado || "",
+        r.semana, r.fase, r.dia, r.dia_nombre, r.ejercicio_id, r.ejercicio, r.grupo,
+        r.set_num, r.peso_kg, r.reps, r.rir, r.completado, r.tempo, r.descanso, r.rir_objetivo,
+        r.notas_ejercicio, r.sueno, r.energia, r.apetito, r.dolor_hombro, r.peso_corporal,
+        data.atleta, data.timestamp
+      ];
+    });
     if (output.length > 0) {
       sh.getRange(sh.getLastRow() + 1, 1, output.length, HEADERS.length).setValues(output);
     }
