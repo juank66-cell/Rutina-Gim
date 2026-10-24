@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Mesociclo 4 Hipertrofia · 4d · U/L</title>
-<meta name="description" content="Registro de rutina de gimnasio – Mesociclo 4 de hipertrofia 4 días Upper/Lower">
+<title>Mesociclo 5 Hipertrofia · 4d · U/L</title>
+<meta name="description" content="Registro de rutina de gimnasio – Mesociclo 5 de hipertrofia 4 días Upper/Lower">
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -749,7 +749,7 @@
 <header>
   <div class="header-top">
     <div>
-      <h1>Mesociclo <span class="accent">4</span></h1>
+      <h1>Mesociclo <span class="accent">5</span></h1>
       <div class="subtitle">4D · Upper/Lower · 5 semanas · Juan K</div>
     </div>
     <div class="header-actions">
@@ -897,23 +897,27 @@
 /* ============================================
    DEFINICIÓN DE LA RUTINA (mesociclo 5 semanas)
    ============================================ */
-// ─── MESOCICLO 4 ── semanas 16-20 · INTENSIFICACIÓN (2do bloque) ──────────
-// Mismo enfoque que el mesociclo 3 — a pedido explícito de Juan K, NO se
-// vuelve a acumulación. Se repite la estructura de periodización (RIR
-// 3/2/1/1/4, carga relativa 1.05→1.12→0.80, series_extra 0/1/1/1/-1) y se
-// renuevan los ejercicios para variar el estímulo y evitar estancamiento
-// por adaptación al patrón motor. Reglas de rotación entre M3→M4:
-//  • Lo que era PRINCIPAL en M3 pasa a variante de semana par (o se retira).
-//  • Lo que era variante en M3 pasa a principal, o se introduce un ejercicio
-//    nuevo si no había variante registrada.
-//  • Ejercicios "intocables" (salud de hombro / prehab / core de calidad)
-//    se mantienen sin cambio: face pull, rotación externa, RDL mancuernas
-//    énfasis isquio.
-//  • ADVERTENCIA DE FATIGA: esto cierra 20 semanas continuas de entreno con
-//    solo deloads de 1 semana cada 5. Si el rendimiento cae de forma
-//    sostenida (no solo un día malo) o el dolor de hombro basal sube,
-//    el meso 5 debería volver a acumulación pura, no a otra intensificación.
-//  • Objetivos de volumen sin cambios vs meso 3 (no se busca más volumen).
+// ─── MESOCICLO 5 ── semanas 21-25 · ACUMULACIÓN (retorno tras 2 bloques de intensificación) ──
+// Motivo: el meso 4 cerró 20 semanas continuas con solo deloads de 1 semana. Su advertencia
+// en código pedía que el meso 5 volviera a acumulación pura, no a otra intensificación.
+// Cambios vs meso 4:
+//  • Rangos de reps más altos (6-8 → 8-10; 8-10 → 10-12; aislados 12-15), cargas más bajas.
+//  • Periodización: RIR 3/2/2/1/4, series_extra 0/1/1/1/-1 (mismo volumen en series que el
+//    meso 4: la acumulación se logra por reps más altas y carga relativa menor, no por
+//    más series — decisión conservadora por las 20 semanas continuas previas; si la
+//    recuperación es buena en S3, S4 admite series_extra 2). Deload: -1 serie (piso de 2
+//    por Math.max en getSeriesForWeek).
+//  • `carga` = fracción SOBRE LA CARGA DE TRABAJO PICO DEL MESO 4 (semana 4). Es un valor
+//    orientativo que solo se muestra en el encabezado; la app no calcula pesos con él.
+//    Con reps +2 a +4 sobre el meso 4, 0.88→0.98 es un punto de partida razonable, pero
+//    la carga real se ajusta por RIR logrado, no por este porcentaje.
+//  • Rotación: el principal del M5 es la variante de semana par del M4; el nuevo par-variante
+//    es un ejercicio NO usado en M4 (evita volver idéntico al M3). Donde el M4 no tenía
+//    variante, el principal pasa a par y entra un ejercicio nuevo de mismo rol.
+//  • Intocables (sin cambio): face pull, rotación externa, RDL mancuernas énfasis isquio,
+//    dominadas asistidas, reverse fly.
+//  • Pisos de RIR (`rir_min`) en ejercicios de hombro: se mantienen igual que en meso 4.
+//  • Objetivos de volumen sin cambios vs meso 4.
 // ─────────────────────────────────────────────────────────────────────────────
 const RUTINA = {
   meta: {
@@ -921,18 +925,18 @@ const RUTINA = {
     edad: 59,
     peso: 89,
     altura: 176,
-    objetivo: "Hipertrofia con transferencia a fuerza — Mesociclo 4 (intensificación, ejercicios renovados)",
+    objetivo: "Hipertrofia con transferencia a fuerza — Mesociclo 5 (acumulación, descarga de intensidad)",
     split: "Upper/Lower 4d",
     duracion_semanas: 5,
     lesion_hombro: true,
-    meso: 4
+    meso: 5
   },
   semanas: [
-    { n: 1, fase: "Base fuerza",      rir: 3, carga: 1.05, series_extra:  0, deload: false },
-    { n: 2, fase: "Intensificación",  rir: 2, carga: 1.07, series_extra:  1, deload: false },
-    { n: 3, fase: "Intensificación",  rir: 1, carga: 1.10, series_extra:  1, deload: false },
-    { n: 4, fase: "Pico fuerza",      rir: 1, carga: 1.12, series_extra:  1, deload: false },
-    { n: 5, fase: "Deload",           rir: 4, carga: 0.80, series_extra: -1, deload: true  }
+    { n: 1, fase: "Acumulación base", rir: 3, carga: 0.88, series_extra:  0, deload: false },
+    { n: 2, fase: "Acumulación",      rir: 2, carga: 0.92, series_extra:  1, deload: false },
+    { n: 3, fase: "Acumulación",      rir: 2, carga: 0.95, series_extra:  1, deload: false },
+    { n: 4, fase: "Pico de volumen",  rir: 1, carga: 0.98, series_extra:  1, deload: false },
+    { n: 5, fase: "Deload",           rir: 4, carga: 0.70, series_extra: -1, deload: true  }
   ],
   objetivos_volumen: {
     "Pecho":              { mev: 11, mav: 16 },
@@ -951,46 +955,48 @@ const RUTINA = {
       ejercicios: [
         {
           id: "D1-A1", codigo: "A1",
-          nombre: "Press de pecho en máquina (convergente)",
-          variante_semana_par: "Incline press máquina",
+          nombre: "Incline press máquina",
+          variante_semana_par: "Press de pecho en máquina (agarre neutro)",
           grupos: ["Pecho"],
-          series_base: 4, reps: "6-8", tempo: "3-1-1-0",
-          descanso: "3:00", hombro_flag: true, rir_min: 3,
-          nota: "Nueva máquina principal (convergente, recorrido guiado en plano medio) — rota el ángulo de carga respecto al meso 3 sin perder la seguridad de la máquina. Semanas pares vuelve el incline máquina del meso anterior. Si el hombro molesta con 6 reps, subí a 8 y bajá carga. Piso RIR 3 fijo — no baja aunque la semana pida menos."
+          series_base: 4, reps: "8-10", tempo: "3-1-1-0",
+          descanso: "2:30", hombro_flag: true, rir_min: 3,
+          nota: "Vuelve el incline en máquina como principal con rango de reps más alto que en meso 4. Semanas pares: press de máquina con agarre neutro (más amigable al hombro). Si el hombro molesta, acortá el rango y bajá carga — no empujes el dolor. Piso RIR 3 fijo."
         },
         {
           id: "D1-A2", codigo: "A2",
-          nombre: "Remo con barra agarre pronado",
-          variante_semana_par: "Remo en polea baja (agarre en V)",
+          nombre: "Remo en polea baja (agarre en V)",
+          variante_semana_par: "Remo con apoyo de pecho en máquina",
           grupos: ["Espalda"],
-          series_base: 4, reps: "6-8", tempo: "3-0-1-1",
-          descanso: "3:00",
-          nota: "Vuelve el remo con barra libre (no se usaba desde antes del meso 3) — mayor demanda de estabilidad de tronco a la misma carga relativa. Espalda neutra estricta, cadera bisagrada fija. Semanas pares: polea baja en V, más control técnico."
+          series_base: 4, reps: "8-10", tempo: "3-0-1-1",
+          descanso: "2:30",
+          nota: "Polea en V como principal: control técnico y menos demanda lumbar en un bloque de volumen. Semanas pares: remo con apoyo de pecho, elimina el gasto de estabilizar el tronco y deja toda la fatiga en la espalda."
         },
         {
           id: "D1-B1", codigo: "B1",
-          nombre: "Press inclinado con mancuernas",
+          nombre: "Decline chest press máquina",
+          variante_semana_par: "Press inclinado con mancuernas",
           grupos: ["Pecho"],
-          series_base: 4, reps: "8-10", tempo: "2-1-1-0",
-          descanso: "2:30", hombro_flag: true, rir_min: 3,
-          nota: "La mancuerna pasa de variante a principal: mayor rango y demanda de estabilización del hombro a intensidad moderada (8-10), sin la carga extrema del A1. Si el hombro no tolera el rango completo, acortá la bajada. Piso RIR 3 fijo."
+          series_base: 4, reps: "10-12", tempo: "2-1-1-0",
+          descanso: "2:00", hombro_flag: true, rir_min: 3,
+          nota: "Ángulo descendente amigable al hombro como principal; la mancuerna inclinada pasa a semanas pares. Controlá la excéntrica (2s). Piso RIR 3 fijo."
         },
         {
           id: "D1-B2", codigo: "B2",
-          nombre: "Remo unilateral con mancuerna (banco)",
-          variante_semana_par: "Remo sentado polea (agarre neutro ancho)",
+          nombre: "Remo sentado polea (agarre neutro ancho)",
+          variante_semana_par: "Remo unilateral con mancuerna (banco)",
           grupos: ["Espalda"],
-          series_base: 4, reps: "8-10", tempo: "2-1-1-1",
+          series_base: 4, reps: "10-12", tempo: "2-1-1-1",
           descanso: "2:00",
-          nota: "Unilateral con apoyo en banco: permite recorrido más largo y contracción más completa por lado que las poleas usadas en mesos anteriores. Semanas pares: polea sentado neutro ancho."
+          nota: "Polea neutra ancha como principal; unilateral con mancuerna en semanas pares para recorrido largo por lado."
         },
         {
           id: "D1-C1", codigo: "C1",
-          nombre: "Cruce de poleas (cable crossover)",
+          nombre: "Apertura en máquina (pec deck)",
+          variante_semana_par: "Cruce de poleas (cable crossover)",
           grupos: ["Pecho"],
           series_base: 2, reps: "12-15", tempo: "3-1-2-0",
           descanso: "90s", hombro_flag: true, rir_min: 3,
-          nota: "Reemplaza el pec deck por tensión constante de polea — mismo rol (2 series, calidad de contracción, NO para intensificar). El cable permite ajustar el ángulo si el pec deck venía generando molestia al final del rango. Piso RIR 3 fijo."
+          nota: "Calidad de contracción, no intensificar. Estiramiento controlado, sin pasar el plano del pecho. Si el pec deck molesta al final del rango, usá el cruce de poleas aunque sea semana impar. Piso RIR 3 fijo."
         },
         {
           id: "D1-C2", codigo: "C2",
@@ -998,7 +1004,7 @@ const RUTINA = {
           grupos: ["Espalda", "Hombro lat/post"],
           series_base: 3, reps: "15-20", tempo: "2-1-1-2",
           descanso: "60s",
-          nota: "Intocable en todos los mesos: salud de hombro. Con el bloque más pesado, esto es más importante que nunca — no lo saltees en semanas 3-4."
+          nota: "Intocable en todos los mesos: salud de hombro. En semana 4 (pico de volumen) no lo saltees."
         },
         {
           id: "D1-D", codigo: "D",
@@ -1006,7 +1012,7 @@ const RUTINA = {
           grupos: ["Prehab"],
           series_base: 2, reps: "15", tempo: "3-0-2-0",
           descanso: "60s", hombro_flag: true, rir_min: 4,
-          nota: "Carga muy ligera, énfasis en control. Codo fijo a 90°. No escalar peso — es prehab. Piso RIR 4 fijo: acá nunca se busca esfuerzo cercano al fallo."
+          nota: "Carga muy ligera, énfasis en control. Codo fijo a 90°. No escalar peso — es prehab. Piso RIR 4 fijo."
         }
       ]
     },
@@ -1017,55 +1023,57 @@ const RUTINA = {
       ejercicios: [
         {
           id: "D2-A", codigo: "A",
-          nombre: "Sentadilla en máquina Smith",
-          variante_semana_par: "Hack squat máquina",
+          nombre: "Hack squat máquina",
+          variante_semana_par: "Prensa 45°",
           grupos: ["Cuádriceps"],
-          series_base: 4, reps: "6-8", tempo: "3-1-1-0",
+          series_base: 4, reps: "8-10", tempo: "3-1-1-0",
           descanso: "3:00",
-          nota: "Smith pasa a principal: trayectoria fija distinta al hack, permite cargar sin gasto de estabilidad. Profundidad hasta donde la pelvis no bascule. Semanas pares vuelve el hack squat del meso 3."
+          nota: "Hack squat principal; prensa 45° en semanas pares (pies medios, sin bloquear rodillas, sin despegar lumbar). Rango completo y controlado."
         },
         {
           id: "D2-B", codigo: "B",
-          nombre: "Peso muerto rumano con barra hexagonal (trap bar)",
-          variante_semana_par: "Peso muerto rumano con mancuernas",
+          nombre: "Peso muerto rumano con mancuernas",
+          variante_semana_par: "Peso muerto rumano con barra hexagonal (trap bar)",
           grupos: ["Isquios/Glúteo"],
-          series_base: 4, reps: "6-8", tempo: "3-1-1-0",
-          descanso: "3:00",
-          nota: "La trap bar centra la carga y es más amigable lumbar que la barra recta a este peso, sin perder el rango de fuerza. Regla dura: la última rep tiene que verse igual que la primera — si la lumbar redondea, esa serie terminó."
+          series_base: 3, reps: "8-10", tempo: "3-1-1-0",
+          descanso: "2:30",
+          nota: "Baja a 3 series base (era 4 con trap bar en meso 4): con rango 8-10 y el RDL de D4, el volumen de isquios/lumbar se maneja con series_extra. Regla dura: la última rep se ve igual que la primera — si la lumbar redondea, esa serie terminó."
         },
         {
           id: "D2-C", codigo: "C",
           nombre: "Extensión de cuádriceps",
+          variante_semana_par: "Extensión de cuádriceps unilateral",
           grupos: ["Cuádriceps"],
-          series_base: 3, reps: "10-12", tempo: "2-1-2-1",
+          series_base: 3, reps: "12-15", tempo: "2-1-2-1",
           descanso: "90s",
-          nota: "Sin cambios. Isométrica 1s arriba. Acá sí podés llegar a RIR 0-1 en semana 4 — es el lugar seguro para vaciar el tanque."
+          nota: "Isométrica 1s arriba. Lugar seguro para acercarte al fallo en semana 4. Unilateral en semanas pares para emparejar piernas."
         },
         {
           id: "D2-D", codigo: "D",
-          nombre: "Curl femoral tumbado",
-          variante_semana_par: "Curl femoral sentado",
+          nombre: "Curl femoral sentado",
+          variante_semana_par: "Curl femoral tumbado",
           grupos: ["Isquios/Glúteo"],
           series_base: 3, reps: "10-12", tempo: "3-1-1-1",
           descanso: "90s",
-          nota: "Tumbado vuelve a ser principal: recluta más el gemelo como sinergista y cambia el ángulo de tracción respecto al sentado del meso 3. Sentado en semanas pares."
+          nota: "Sentado principal (isquio más estirado, buen estímulo de hipertrofia en acumulación). Tumbado en semanas pares."
         },
         {
           id: "D2-E", codigo: "E",
-          nombre: "Elevación de gemelos en prensa (leg press)",
+          nombre: "Elevación de gemelos de pie (máquina)",
+          variante_semana_par: "Elevación de gemelos en prensa (leg press)",
           grupos: ["Pantorrilla"],
-          series_base: 3, reps: "10-12", tempo: "2-2-1-1",
+          series_base: 3, reps: "12-15", tempo: "2-2-1-1",
           descanso: "60s",
-          nota: "Nuevo: la prensa permite cargar el gemelo con la cadera y rodilla fijas, distinto estímulo al de pie. Pausa completa abajo (estiramiento) en cada rep."
+          nota: "Pausa completa abajo (estiramiento) en cada rep. En prensa durante semanas pares."
         },
         {
           id: "D2-F", codigo: "F",
-          nombre: "Dead bug (anti-extensión lumbar)",
-          variante_semana_par: "Plancha frontal (45-60s)",
+          nombre: "Plancha frontal",
+          variante_semana_par: "Dead bug (anti-extensión lumbar)",
           grupos: ["Core"],
           series_base: 3, reps: "45-60s", tempo: "iso",
           descanso: "60s",
-          nota: "Dead bug pasa a principal: control lumbo-pélvico bajo carga dinámica, complementa mejor al trap bar RDL pesado que la plancha estática. Plancha en semanas pares."
+          nota: "Plancha principal; dead bug en semanas pares. Costillas abajo, glúteo apretado, sin hundir lumbar."
         }
       ]
     },
@@ -1076,30 +1084,30 @@ const RUTINA = {
       ejercicios: [
         {
           id: "D3-A1", codigo: "A1",
-          nombre: "Landmine press unilateral",
-          variante_semana_par: "Shoulder press máquina",
+          nombre: "Shoulder press máquina",
+          variante_semana_par: "Landmine press unilateral",
           grupos: ["Hombro lat/post"],
-          series_base: 4, reps: "6-8", tempo: "3-1-1-0",
-          descanso: "3:00", hombro_flag: true, rir_min: 3,
-          nota: "El landmine pasa a principal: plano escapular, sigue siendo el press pesado más seguro para el hombro lesionado. Igual regla: si el dolor pre-entreno marca ≥2, hacé 8-10 con menos carga — no negociable. Semanas pares: shoulder press máquina a 8 reps. Piso RIR 3 fijo."
+          series_base: 4, reps: "8-10", tempo: "3-1-1-0",
+          descanso: "2:30", hombro_flag: true, rir_min: 3,
+          nota: "Máquina como principal: trayectoria guiada, más fácil cortar el rango si el hombro avisa. Si el dolor pre-entreno marca ≥2, hacé 10-12 con menos carga — no negociable. Semanas pares: landmine (plano escapular). Piso RIR 3 fijo."
         },
         {
           id: "D3-A2", codigo: "A2",
-          nombre: "Jalón al pecho (agarre supino estrecho)",
-          variante_semana_par: "Jalón al pecho (agarre neutro)",
+          nombre: "Jalón al pecho (agarre neutro)",
+          variante_semana_par: "Jalón al pecho (agarre supino estrecho)",
           grupos: ["Espalda"],
-          series_base: 4, reps: "6-8", tempo: "3-0-1-1",
+          series_base: 4, reps: "8-10", tempo: "3-0-1-1",
           descanso: "2:30",
-          nota: "Nuevo grip: supino estrecho mete más bíceps y da mejor palanca para cargar en 6-8 que el neutro del meso 3. Torso puede inclinarse levemente atrás (10-15°), sin kipping. Semanas pares: agarre neutro."
+          nota: "Agarre neutro principal; supino estrecho en semanas pares. Torso con inclinación leve (10-15°), sin kipping."
         },
         {
           id: "D3-B1", codigo: "B1",
-          nombre: "Elevación lateral cable unilateral",
-          variante_semana_par: "Elevación lateral en máquina",
+          nombre: "Elevación lateral en máquina",
+          variante_semana_par: "Elevación lateral cable unilateral",
           grupos: ["Hombro lat/post"],
           series_base: 3, reps: "12-15", tempo: "2-1-2-1",
           descanso: "90s", hombro_flag: true, rir_min: 3,
-          nota: "El cable unilateral pasa a principal: tensión constante en toda la fase (a diferencia de la máquina, no se cae en el punto bajo). Piso RIR 3 fijo — no se acerca al fallo en este ejercicio pese a lo que diga la nota anterior."
+          nota: "Resistencia constante, sin sacudida inicial. Cable unilateral en semanas pares. Piso RIR 3 fijo — no se acerca al fallo en este ejercicio."
         },
         {
           id: "D3-B2", codigo: "B2",
@@ -1108,25 +1116,25 @@ const RUTINA = {
           grupos: ["Espalda"],
           series_base: 3, reps: "5-8", tempo: "3-0-1-1",
           descanso: "2:30",
-          nota: "Se mantiene sin cambios — es progresión de habilidad (reducir asistencia), no tiene sentido rotarla entre mesos. Objetivo: cerrar semana 4 con menos asistencia que el mejor registro del meso 3."
+          nota: "Sin cambios: progresión de habilidad (reducir asistencia). Objetivo: cerrar semana 4 con igual o menor asistencia que el mejor registro del meso 4."
         },
         {
           id: "D3-C1", codigo: "C1",
-          nombre: "Curl bíceps en polea baja (agarre supino)",
-          variante_semana_par: "Curl bíceps en predicador",
+          nombre: "Curl bíceps en predicador",
+          variante_semana_par: "Curl bíceps en polea baja (agarre supino)",
           grupos: ["Bíceps"],
-          series_base: 3, reps: "8-10", tempo: "3-0-1-1",
+          series_base: 3, reps: "10-12", tempo: "3-0-1-1",
           descanso: "90s",
-          nota: "La polea pasa a principal: tensión constante en el estiramiento, distinto estímulo al predicador del meso 3. Predicador en semanas pares para variar el ángulo."
+          nota: "Predicador principal (estiramiento con carga); polea baja en semanas pares."
         },
         {
           id: "D3-C2", codigo: "C2",
-          nombre: "Extensión tríceps polea (cuerda push-down)",
-          variante_semana_par: "Extensión tríceps sobre cabeza en polea",
+          nombre: "Extensión tríceps sobre cabeza en polea",
+          variante_semana_par: "Extensión tríceps polea (cuerda push-down)",
           grupos: ["Tríceps"],
-          series_base: 3, reps: "8-10", tempo: "3-1-1-0",
+          series_base: 3, reps: "10-12", tempo: "3-1-1-0",
           descanso: "90s",
-          nota: "El push-down pasa a principal: mejor palanca para cargar en 8-10 con codo estable. Sobre cabeza en semanas pares para mantener el estímulo en tríceps largo."
+          nota: "Sobre cabeza como principal (tríceps largo en estiramiento, mejor estímulo de hipertrofia). Push-down en semanas pares."
         },
         {
           id: "D3-D", codigo: "D",
@@ -1134,7 +1142,7 @@ const RUTINA = {
           grupos: ["Hombro lat/post"],
           series_base: 2, reps: "15-20", tempo: "2-1-2-1",
           descanso: "60s",
-          nota: "Prehab/volumen posterior. Mantener 2 series — carga moderada con recorrido completo."
+          nota: "Prehab/volumen posterior. Carga moderada, recorrido completo."
         }
       ]
     },
@@ -1145,21 +1153,21 @@ const RUTINA = {
       ejercicios: [
         {
           id: "D4-A", codigo: "A",
-          nombre: "B-stance hip thrust con barra",
-          variante_semana_par: "Hip thrust con barra",
+          nombre: "Hip thrust con barra",
+          variante_semana_par: "B-stance hip thrust con barra",
           grupos: ["Isquios/Glúteo"],
-          series_base: 4, reps: "6-8", tempo: "2-1-1-2",
-          descanso: "3:00",
-          nota: "El B-stance pasa a principal: reparte la carga de forma asimétrica manteniendo el patrón bilateral, mayor demanda por lado a la misma carga en barra. Pausa 2s arriba obligatoria. Semanas pares: hip thrust bilateral estándar."
+          series_base: 4, reps: "8-10", tempo: "2-1-1-2",
+          descanso: "2:30",
+          nota: "Barbilla metida, sin hiperextender lumbar, empuja con talones, pausa 1-2s arriba. B-stance en semanas pares."
         },
         {
           id: "D4-B", codigo: "B",
-          nombre: "Zancada caminando con mancuernas",
-          variante_semana_par: "Sentadilla búlgara con mancuernas",
+          nombre: "Sentadilla búlgara con mancuernas",
+          variante_semana_par: "Zancada caminando con mancuernas",
           grupos: ["Cuádriceps", "Isquios/Glúteo"],
-          series_base: 4, reps: "8-10 /pierna", tempo: "3-1-1-0",
+          series_base: 4, reps: "10-12 /pierna", tempo: "3-1-1-0",
           descanso: "2:30",
-          nota: "La zancada caminando pasa a principal: agrega componente de desplazamiento y demanda de estabilidad dinámica que la búlgara (fija) no tiene. Se mantiene en 8-10 — el unilateral no baja a 6 reps."
+          nota: "Búlgara principal con rango de reps más alto que en meso 4. Zancada caminando en semanas pares."
         },
         {
           id: "D4-C", codigo: "C",
@@ -1167,34 +1175,34 @@ const RUTINA = {
           grupos: ["Isquios/Glúteo"],
           series_base: 3, reps: "10-12", tempo: "3-2-1-0",
           descanso: "2:00",
-          nota: "Sin cambios: pausa 2s abajo en máximo estiramiento. Es el contrapeso de calidad al RDL pesado del D2 — no lo conviertas en otro ejercicio de carga."
+          nota: "Sin cambios: pausa 2s abajo en máximo estiramiento. Contrapeso de calidad al RDL del D2."
         },
         {
           id: "D4-D", codigo: "D",
-          nombre: "Abductor en máquina",
-          variante_semana_par: "Abductor de cadera en polea (tobillo)",
+          nombre: "Abductor de cadera en polea (tobillo)",
+          variante_semana_par: "Abductor en máquina",
           grupos: ["Isquios/Glúteo"],
           series_base: 3, reps: "12-15", tempo: "2-1-2-1",
           descanso: "60s",
-          nota: "Se agrega rotación semanas pares (polea de tobillo) para variar el vector de resistencia — venía sin cambios desde el meso 1."
+          nota: "Polea de tobillo principal; máquina en semanas pares."
         },
         {
           id: "D4-E", codigo: "E",
-          nombre: "Gemelo unilateral con mancuerna",
-          variante_semana_par: "Elevación gemelos sentado",
+          nombre: "Elevación gemelos sentado",
+          variante_semana_par: "Gemelo unilateral con mancuerna",
           grupos: ["Pantorrilla"],
-          series_base: 3, reps: "10-12", tempo: "2-2-1-1",
+          series_base: 3, reps: "12-15", tempo: "2-2-1-1",
           descanso: "60s",
-          nota: "Unilateral de pie con mancuerna: exige más equilibrio y permite parejar posibles diferencias entre piernas. Sentado (rodilla flexionada, más sóleo) en semanas pares."
+          nota: "Sentado (rodilla flexionada, más sóleo) principal; unilateral de pie con mancuerna en semanas pares."
         },
         {
           id: "D4-F", codigo: "F",
-          nombre: "Pallof press en kneeling (de rodillas)",
-          variante_semana_par: "Pallof press (anti-rotación)",
+          nombre: "Pallof press (anti-rotación)",
+          variante_semana_par: "Pallof press en kneeling (de rodillas)",
           grupos: ["Core"],
           series_base: 3, reps: "10 /lado", tempo: "2-2-2-0",
           descanso: "60s",
-          nota: "El kneeling pasa a principal: elimina la ayuda de cadera del meso 3, más demanda pura de estabilidad lumbar. De pie en semanas pares."
+          nota: "De pie principal; de rodillas en semanas pares."
         }
       ]
     }
@@ -1204,7 +1212,7 @@ const RUTINA = {
 /* ============================================
    ESTADO GLOBAL Y PERSISTENCIA
    ============================================ */
-const STORAGE_KEY = "rutina_juank_v4";
+const STORAGE_KEY = "rutina_juank_v5";
 const CONFIG_KEY = "rutina_config_v1";
 
 let state = loadState();
